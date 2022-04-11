@@ -1,0 +1,151 @@
+
+To deploy LAMP Stack
+
+#Spin EC2 Instance
+
+#Select Ubuntu Image (Free Tier)
+
+#Tag: Name Project 1
+
+#Security Group : Allow Inbound on Port 22 
+
+#connect to instance from terminal
+
+ssh -i <private-key-name>.pem ubuntu@<Public-IP-address>
+
+#Editor: MobaXterm Editor
+
+#Launch Terminal
+
+
+sudo apt update         
+
+# Install Apache
+
+sudo apt install apache2
+
+# check the install status
+
+sudo systemctl status apache2
+
+#We have used port 22 SSH to connect to the Instance
+
+#To enable internet connectivity inbound we need to enable port 80 in the security group
+
+
+
+#Test port 80 (domain):
+curl http://localhost:80
+
+#Test port 80 (IP:)  
+curl http://127.0.0.1:80
+
+#NEXT INSTALL MYSQL
+
+sudo apt install mysql-server
+
+sudo mysql      -  mysql console
+
+#NEXT INSTALL PHP
+
+sudo apt install php libapache2-mod-php php-mysql
+
+sudo php -v       To check php version       -   PHP 7.4.3 (cli) (built: Mar  2 2022 15:36:52) ( NTS )
+
+
+#Set up domain called projectlamp
+
+sudo mkdir /var/www/projectlamp
+
+
+#Change ownership of directory to current user
+
+sudo chown -R $USER:$USER /var/www/projectlamp
+
+#CONFIGURATION FILE
+
+sudo vi /etc/apache2/sites-available/projectlamp.conf
+
+#Press i to INSERT
+
+<VirtualHost *:80>
+    ServerName projectlamp
+    ServerAlias www.projectlamp 
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/projectlamp
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+# press ESCAPE : wq and press ENTER to save
+
+# To see contents of sites-available
+sudo ls /etc/apache2/sites-available
+
+#We shall now use a2ensite command to enable the new virtual host:
+
+sudo a2ensite projectlamp
+
+#Now we shall disable apaches default website
+
+sudo a2dissite 000-default
+
+#To make sure our configuration file doesn’t contain syntax errors, we shall run:
+
+sudo apache2ctl configtest
+
+Next, we shall reload apache 2
+
+sudo systemctl reload apache2
+
+#Next, we need to to create the index.htl file and write into it:
+#sudo echo 'Hello LAMP from hostname' $(curl -s http://169.254.169.254/latest/meta-data/public-hostname) 
+#'with public IP' $(curl -s http://169.254.169.254/latest/meta-data/public-ipv4) > /var/www/projectlamp/index.html
+
+#Now we can access our webites index.html page using the public IP or Public DNS
+
+http://<Public-IP-Address>:80
+
+http://<Public-DNS-Name>:80
+
+#As Apache loads index.html before index.php, to change the order, we must edit the directory configuration:
+
+sudo vim /etc/apache2/mods-enabled/dir.conf
+
+<IfModule mod_dir.c>
+        #Change this:
+        #DirectoryIndex index.html index.cgi index.pl index.php index.xhtml index.htm
+        #To this:
+        DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+</IfModule>
+
+
+#Next, we reload apache for changes to take effect:
+
+sudo systemctl reload apache2
+
+
+#We create an index.php file that echos PHP settings of the server:
+
+sudo vim /var/www/projectlamp/index.php
+
+#This will open a blank file. Add the following text, which is valid PHP code, inside the file:
+
+<?php
+phpinfo();
+
+
+http://<Public-IP-Address>:80 and http://<Public-DNS-Name>:80 now display PHP settings.
+
+instance stopped. End of project.
+
+
+
+
+
+
+
+
+
+
+
